@@ -1,0 +1,60 @@
+---
+title: "Week6"
+author: "Nikols"
+date: "2026-09-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Cell Dataset
+#Percent survival must be the only response variable
+```{r}
+## Perform model selection on the Cell_Inhibition_Schoenfeld.csv dataset.
+# Investigate the relative importance of Inhibitor, Cell Line, VHL status, and Concentration of Inhibitor on Percent Survival. To do this properly, you will need to do the following:
+# Use the lm() function with percent survival as the only response variable each time.
+# Model just the intercept.
+# Then, model at least 10 different combinations of those four predictors. At least one model must have an interaction.
+# Test each model with aicc using the AICcmodavg package in R.
+# After you are done with all models, calculate delta AICC for all of them.
+# Describe your justification of why you chose those models. Did you start with the full model and work your way down? Did you start with univariate models and add predictors?
+# Which model(s) explained the data the best?
+# Take a summary of the best model(s) and describe which features are significant.
+# What is your interpretation of the best model?
+```
+```{r}
+library(readr)
+cell <- read_csv("Cell_Inhibition_Schoenfeld.csv")
+View(Cell_Inhibition_Schoenfeld)
+library(AICcmodavg) 
+```
+```{r}
+#Inhibitor (column=Inhibitor), Cell Line (col=`Cell Line`), VHL status (col=4), and Concentration of Inhibitor (col=`Concentration uM`) on Percent Survival(col=PercentSurvival)
+cell1 <- lm(cell$PercentSurvival ~ 1)
+cell2 <- lm(cell$PercentSurvival ~ cell$`Concentration uM` + cell$Inhibitor + cell$`Cell Line` + cell$VHL)
+cell3 <- lm(cell$PercentSurvival ~ cell$`Concentration uM`*cell$Inhibitor + cell$`Cell Line` + cell$VHL)
+cell4 <- lm(cell$PercentSurvival ~ cell$`Concentration uM`*cell$Inhibitor*cell$`Cell Line`)
+cell5 <- lm(cell$PercentSurvival ~ cell$`Concentration uM`*cell$Inhibitor)
+cell6 <- lm(cell$PercentSurvival ~ cell$`Concentration uM`)
+cell7  <- lm(cell$PercentSurvival ~ cell$Inhibitor)
+cell8 <- lm(cell$PercentSurvival ~ cell$`Cell Line`)
+cell9 <- lm(cell$PercentSurvival ~ cell$VHL)
+cell10 <- lm(cell$PercentSurvival ~ cell$`Cell Line` * cell$VHL)
+```
+```{r}
+#AICc Values
+AICc(cell1)
+AICc(cell2)
+AICc(cell3)
+AICc(cell4)
+AICc(cell5)
+AICc(cell6)
+AICc(cell7)
+AICc(cell8)
+AICc(cell9)
+AICc(cell10)
+```
+#Answers:
+#I chose these models because...
+# Out of the ten models included, the best fit was the model lm(cell$PercentSurvival ~ cell$`Concentration uM` + cell$Inhibitor + cell$`Cell Line` + cell$VHL), the complete multivariate model with all four potential predictors included but wherein none of the models had an interaction term with one another. The next best model contained 
