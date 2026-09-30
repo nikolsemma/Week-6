@@ -1,0 +1,133 @@
+---
+title: "Bayesian Week 6"
+author: "Nikols"
+date: "2026-09-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Bayesian Statistics Practice Examples
+# https://a-little-book-of-r-for-bayesian-statistics.readthedocs.io/en/latest/src/bayesianstats.html 
+# First half of this document will be following along this website
+```{r}
+library("LearnBayes")
+```
+
+```{r}
+#Estimating Proportions: People who like chocolate
+quantile1 <- list(p=0.5, x=0.85) #this specifies a median of the prior is 0.85
+quantile2 <- list(p=0.99999, x=0.95) #the 99.999th percentile of the prior is 0.95
+quantile3 <- list(p=0.00001, x=0.60) #the 0.001st percentile of the prior is 0.60
+findBeta <- function(quantile1,quantile2,quantile3)
+{
+     # find the quantiles specified by quantile1 and quantile2 and quantile3
+     quantile1_p <- quantile1[[1]]; quantile1_q <- quantile1[[2]]
+     quantile2_p <- quantile2[[1]]; quantile2_q <- quantile2[[2]]
+     quantile3_p <- quantile3[[1]]; quantile3_q <- quantile3[[2]]
+
+     # find the beta prior using quantile1 and quantile2
+     priorA <- beta.select(quantile1,quantile2)
+     priorA_a <- priorA[1]; priorA_b <- priorA[2]
+
+     # find the beta prior using quantile1 and quantile3
+     priorB <- beta.select(quantile1,quantile3)
+     priorB_a <- priorB[1]; priorB_b <- priorB[2]
+
+     # find the best possible beta prior
+     diff_a <- abs(priorA_a - priorB_a); diff_b <- abs(priorB_b - priorB_b)
+     step_a <- diff_a / 100; step_b <- diff_b / 100
+     if (priorA_a < priorB_a) { start_a <- priorA_a; end_a <- priorB_a }
+     else                     { start_a <- priorB_a; end_a <- priorA_a }
+     if (priorA_b < priorB_b) { start_b <- priorA_b; end_b <- priorB_b }
+     else                     { start_b <- priorB_b; end_b <- priorA_b }
+     steps_a <- seq(from=start_a, to=end_a, length.out=1000)
+     steps_b <- seq(from=start_b, to=end_b, length.out=1000)
+     max_error <- 10000000000000000000
+     best_a <- 0; best_b <- 0
+     for (a in steps_a)
+     {
+        for (b in steps_b)
+        {
+           # priorC is beta(a,b)
+           # find the quantile1_q, quantile2_q, quantile3_q quantiles of priorC:
+           priorC_q1 <- qbeta(c(quantile1_p), a, b)
+           priorC_q2 <- qbeta(c(quantile2_p), a, b)
+           priorC_q3 <- qbeta(c(quantile3_p), a, b)
+           priorC_error <- abs(priorC_q1-quantile1_q) +
+                           abs(priorC_q2-quantile2_q) +
+                           abs(priorC_q3-quantile3_q)
+           if (priorC_error < max_error)
+           {
+             max_error <- priorC_error; best_a <- a; best_b <- b
+           }
+       }
+    }
+    print(paste("The best beta prior has a=",best_a,"b=",best_b))
+}
+
+findBeta(quantile1,quantile2,quantile3)
+```
+# Beta prior
+## This output means that the most appropriate prior to use for the proportion of people who like chocolate is a Beta prior with a=52.22, b=9.52 AKA a Beta(52.22, 9.52) prior. To plot this, use the curve() function: 
+```{r}
+curve(dbeta(x,52.22,9.52105105105105))
+#Curve output represents initial beliefs that the peak of the distribution would be around 0.85, and that almost the entire density lies between 0.68-0.97. 
+```
+#Calculating the Likelihood Function for a Proportion
+## Used to estimate a proportion with a small dataset, for example a survey of 50 people to see if they like chocolate -> data used to calculate the conditional p.m.f (probability mass function) of the proportion given the observed data = the likelihood function. 
+#This is used to estimate how likely the possible values of the proportion are given the observed data.
+```{r}
+calcLikelihoodForProportion <- function(successes,total)
+{
+     curve(dbinom(successes,total,x)) # plots the likelihood
+}
+calcLikelihoodForProportion(45,50) #this hypothetical data would be a survey of 50 people -> 45 say they like chocolate (45 "successes") -> curve shows that the peak of the likelihood distribution is equal to 0.9, which is equivalent to 45/50 -> means that the most likely value of the proportion, given the observed data, is 0.9. 
+```
+#Calculating Posterior Distribution for a Proportion
+# If you are trying to estimate a proportion and have a prior distribution and have collected some data, you can calculate the likelihood function for the proportion given the data.
+# After observing the data you may wish to update the prior distribution for the proportion -> calculate the conditional distribution of the proportion given the data and the prior. This is called the posterior distribution for the proportion. 
+# Summarizes what is known about the proportion after the data has been observed and combines the information from the prior and the data. 
+# Chocolate example: Beta(52.22, 9.42) prior distribution; data from the survey found 45/50 people like chocolate. We can calculate the posterior distribution for the proportion given the prior and data using the function calcPosteriorForProportion() as follows:
+```{r}
+calcPosteriorForProportion <- function(successes, total, a, b)
+  {
+     # Adapted from triplot() in the LearnBayes package
+     # Plot the prior, likelihood and posterior:
+     likelihood_a = successes + 1; likelihood_b = total - successes + 1
+     posterior_a = a + successes;  posterior_b = b + total - successes
+     theta = seq(0.005, 0.995, length = 500)
+     prior = dbeta(theta, a, b)
+     likelihood = dbeta(theta, likelihood_a, likelihood_b)
+     posterior  = dbeta(theta, posterior_a, posterior_b)
+     m = max(c(prior, likelihood, posterior))
+     plot(theta, posterior, type = "l", ylab = "Density", lty = 2, lwd = 3,
+          main = paste("beta(", a, ",", b, ") prior, B(", total, ",", successes, ") data,",
+          "beta(", posterior_a, ",", posterior_b, ") posterior"), ylim = c(0, m), col = "red")
+     lines(theta, likelihood, lty = 1, lwd = 3, col = "blue")
+     lines(theta, prior, lty = 3, lwd = 3, col = "green")
+     legend(x=0.8,y=m, c("Prior", "Likelihood", "Posterior"), lty = c(3, 1, 2),
+          lwd = c(3, 3, 3), col = c("green", "blue", "red"))
+     # Print out summary statistics for the prior, likelihood and posterior:
+     calcBetaMode <- function(aa, bb) { BetaMode <- (aa - 1)/(aa + bb - 2); return(BetaMode); }
+     calcBetaMean <- function(aa, bb) { BetaMean <- (aa)/(aa + bb); return(BetaMean); }
+     calcBetaSd   <- function(aa, bb) { BetaSd <- sqrt((aa * bb)/(((aa + bb)^2) * (aa + bb + 1))); return(BetaSd); }
+     prior_mode      <- calcBetaMode(a, b)
+     likelihood_mode <- calcBetaMode(likelihood_a, likelihood_b)
+     posterior_mode  <- calcBetaMode(posterior_a, posterior_b)
+     prior_mean      <- calcBetaMean(a, b)
+     likelihood_mean <- calcBetaMean(likelihood_a, likelihood_b)
+     posterior_mean  <- calcBetaMean(posterior_a, posterior_b)
+     prior_sd        <- calcBetaSd(a, b)
+     likelihood_sd   <- calcBetaSd(likelihood_a, likelihood_b)
+     posterior_sd    <- calcBetaSd(posterior_a, posterior_b)
+     print(paste("mode for prior=",prior_mode,", for likelihood=",likelihood_mode,", for posterior=",posterior_mode))
+     print(paste("mean for prior=",prior_mean,", for likelihood=",likelihood_mean,", for posterior=",posterior_mean))
+     print(paste("sd for prior=",prior_sd,", for likelihood=",likelihood_sd,", for posterior=",posterior_sd))
+}
+calcPosteriorForProportion(45, 50, 52.22, 9.52)
+```
+# Result: a peak in the posterior is seen on the graph approximately halfway between the peaks of the likelihood given the survey and the prior -> indicates that the data contribute roughly equally to the posterior. 
+
