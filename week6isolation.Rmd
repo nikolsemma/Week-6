@@ -1,0 +1,56 @@
+---
+title: "Week6isolation"
+author: "Nikols"
+date: "2026-10-01"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Isolation data: Find the best fit model using response and interacting response variables.
+##I'm still working on this but I wanted to put it out there that both of the following linear models are a good fit for the data: area + isolation and area * isolation as the predictor variables. I don't know if some parameters have to be adjusted because area is in km squared and isolation is in km 
+```{r}
+library(readr)
+library(AICcmodavg)
+library(car)
+Isolation <- read_csv("Isolation.csv")
+```
+```{r}
+#Linear models for variables where the response is incidence (0=bird does not breed there, 1=bird found). Explanatory variables are the area of the island (km2) and isolation of the island (distance from the mainland, km)
+iso0 <- lm(incidence ~ 1, data=Isolation)
+iso1 <- lm(incidence ~ area, data=Isolation)
+iso2 <- lm(incidence ~ isolation, data=Isolation)
+iso3 <- lm(incidence ~ area + isolation, data=Isolation)
+iso4 <- lm(incidence ~ area * isolation, data=Isolation)
+```
+
+```{r}
+#AICc Values
+AICc(iso0)
+AICc(iso1)
+AICc(iso2)
+AICc(iso3)
+AICc(iso4)
+```
+```{r}
+#Delta AICc values
+(dAICC1 <- AICc(iso0) - AICc(iso4))
+(dAICC2 <- AICc(iso1) - AICc(iso4))
+(dAICC3 <- AICc(iso2) - AICc(iso4))
+(dAICC4 <- AICc(iso3) - AICc(iso4)) 
+(dAICC5 <- AICc(iso4) - AICc(iso4))
+```
+
+```{r}
+par(mfrow = c(1, 2))
+with(Isolation, (Boxplot(area, incidence)))
+with(Isolation, (Boxplot(isolation, incidence)))
+```
+```{r}
+summary(iso3)
+summary(iso4)
+```
+

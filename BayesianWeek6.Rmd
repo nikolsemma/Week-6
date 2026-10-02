@@ -14,6 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # First half of this document will be following along this website
 ```{r}
 library("LearnBayes")
+library(readr)
+library(readxl)
 ```
 
 ```{r}
@@ -129,5 +131,21 @@ calcPosteriorForProportion <- function(successes, total, a, b)
 }
 calcPosteriorForProportion(45, 50, 52.22, 9.52)
 ```
-# Result: a peak in the posterior is seen on the graph approximately halfway between the peaks of the likelihood given the survey and the prior -> indicates that the data contribute roughly equally to the posterior. 
+# Result: a peak in the posterior is seen on the graph approximately halfway between the peaks of the likelihood given the survey and the prior -> indicates that the data contribute roughly equally to the posterior. Note that the likelihood has been scaled so that the area underneath it is also 1, making it easy to compare the likelihood with the prior and the posterior.
+
+#Dice Lab 
+# Second half: following along with the Dice example from class/the Dice lab. 
+# A 6 sided-die is called a d6, and people often collect polyhedral dice in standard sizes. Those sizes are d4, d6, d8, d10, d12, and d20, where dN is shorthand for a dice with N sides.
+# You are following a table of six DND players where they are very bad at writing down which dice they roll, but they know exactly how many of each type of die they have. For each of the following sets of dice rolls, do a Bayesian analysis. Calculate and plot the log-likelihood and the posterior in R for all six dice types. Use the values in Table 2 as the basis for your priors.
+```{r}
+#number of rolls for each individual
+BenjiRolls <- c(8, 8, 5, 16, 6, 8)
+MarcusRolls <- c(12, 8, 2, 1, 4, 7)
+CarrieRolls <- c(5, 8, 7, 3, 2, 6)
+LucyRolls <- c(3, 5, 2, 3, 4, 3)
+```
+```{r}
+NumberDice <- read_excel("NumberDiceTable2.xlsx")
+View(NumberDice)
+```
 
