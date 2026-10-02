@@ -2,31 +2,28 @@
 title: "Week6"
 author: "Nikols"
 date: "2026-09-29"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ## Cell Dataset
-#Percent survival must be the only response variable
 ```{r}
-## Perform model selection on the Cell_Inhibition_Schoenfeld.csv dataset.
-# Investigate the relative importance of Inhibitor, Cell Line, VHL status, and Concentration of Inhibitor on Percent Survival. To do this properly, you will need to do the following:
-# Use the lm() function with percent survival as the only response variable each time.
-# Model just the intercept.
-# Then, model at least 10 different combinations of those four predictors. At least one model must have an interaction.
-# Test each model with aicc using the AICcmodavg package in R.
-# After you are done with all models, calculate delta AICC for all of them.
-# Describe your justification of why you chose those models. Did you start with the full model and work your way down? Did you start with univariate models and add predictors?
-# Which model(s) explained the data the best?
-# Take a summary of the best model(s) and describe which features are significant.
-# What is your interpretation of the best model?
+##Instructions: Perform model selection on the Cell_Inhibition_Schoenfeld.csv dataset.
+##Investigate the relative importance of Inhibitor, Cell Line, VHL status, and Concentration of Inhibitor on Percent Survival. To do this properly, you will need to do the following:
+##Use the lm() function with percent survival as the only response variable each time. Model just the intercept. Then, model at least 10 different combinations of those four predictors. At least one model must have an interaction. Test each model with aicc using the AICcmodavg package in R. After you are done with all models, calculate delta AICC for all of them.
+##Describe your justification of why you chose those models. Did you start with the full model and work your way down? Did you start with univariate models and add predictors? Which model(s) explained the data the best?
+##Take a summary of the best model(s) and describe which features are significant. What is your interpretation of the best model?
 ```
+##Answers:
+##I chose these models in order to include all four variables, each variable on their own, and then interactions between variables that I thought would be likely to have entangled biological impacts. Specifically, I assumed that the inhibitor used and the concentration of the inhibitor would have an impact on one another as well as on percent survival as a response variable. Therefore, I included one model (model 3) with all four predictor variables and with inhibitor and concentraion interacting, as well as a few other exploratory models with inhibitor*concentration as interaction terms and with different combinations of predictors. Finally, to check if one single variable had a particularly low AICc when regressed on percent survival, I included univariate models. Out of the ten models included, the best fit was the complete multivariate model (model 2) with all four potential predictors included but with no interactions between variables. The next best model contained all four predictors with the inhibitor and the concentration of the inhibitor interacting with/dependent upon one another. The delta AICc between the best fit and second best fit model was slightly higher than 2 (dAICc=2.066364), which is close to the arbitrary cutoff value of 2, indicating this is a similarly close fit model to the data. When the predictor variables "inhibitor" or "concentration" are removed from the linear model, there is a sharp increase in the dAICc compared to the best fit model, suggesting these variables have a strong relationship with percent survival. Using the summary function on the best fit model revealed that all four predictor variables have a statistically significant p-value with respect to percent survival (considering an alpha value of 0.05). It appears that as concentration of the inhibitor increases, percent survival decreases, an outcome that we would hope for considering that this dataset concerns inhibiting the growth of cancer cells. The other three variables are more difficult to interpret using the summary function considering that they are categorical. However, based on my group's exploration of this data last week, the results of this test support our previous interpretation that inhibitor treatment and its concentration is negatively correlated with survival, and that the different cell lines and VHL +/- are associated with a different survival response. 
 ```{r}
 library(readr)
 cell <- read_csv("Cell_Inhibition_Schoenfeld.csv")
-View(Cell_Inhibition_Schoenfeld)
+View(cell)
 library(AICcmodavg) 
 ```
 ```{r}
@@ -79,8 +76,3 @@ library(car)
 qqPlot(aov(cell2)$residuals, id = FALSE) # id = FALSE to remove point identification
 ```
 
-##Answers:
-##I chose these models in order to include all four variables, each variable on their own, and then interactions between variables that I thought would be likely to have a biological impact on one another. Specifically, I assumed that the inhibitor used and the concentration of the inhibitor would have an impact on one another as well as on percent survival as a response variable. Therefore, I included one model (model 3) with all four predictor variables and with inhibitor and concentraion interacting, as well as a few other exploratory models with inhibitor*concentration as interaction terms and with different combinations of predictors. Finally, to check if one single variable had a particularly low AICc when regressed on percent survival, I included univariate models.
-##Out of the ten models included, the best fit was the model lm(cell$PercentSurvival ~ cell$`Concentration uM` + cell$Inhibitor + cell$`Cell Line` + cell$VHL), the complete multivariate model with all four potential predictors included but with no interactions between variables. The next best model contained all four predictors with the inhibitor and the concentration of the inhibitor interacting with one another. The delta AICc between the best fit and second best fit models was slightly higher than 2 (dAICc=2.066364), which is close to the arbitrary cutoff at the value of 2, indicating this is a similarly close fit model to the data. 
-##When the predictor variables "inhibitor" or "concentration" are removed from the linear model, there is a sharp increase in the dAICc compared to the best fit model, suggesting these variables have a strong relationship with percent survival. 
-##Using the summary function on the best fit model revealed that all four predictor variables have a statistically significant p-value with respect to percent survival (considering an alpha value of 0.05). It appears that as concentration of the inhibitor increases, percent survival decreases, an outcome that we would hope for considering that this dataset concerns inhibiting the growth of cancer cells. The other three variables are more difficult to interpret using the summary function considering that they are categorical. However, based on my group's exploration of this data last week, the results of this test support our interpretation that inhibitor treatment and its concentration is negatively correlated with survival, and that the different cell lines and VHL +/- are associated with a different survival response. 
