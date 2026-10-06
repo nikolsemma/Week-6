@@ -133,8 +133,122 @@ calcPosteriorForProportion(45, 50, 52.22, 9.52)
 ```
 # Result: a peak in the posterior is seen on the graph approximately halfway between the peaks of the likelihood given the survey and the prior -> indicates that the data contribute roughly equally to the posterior. Note that the likelihood has been scaled so that the area underneath it is also 1, making it easy to compare the likelihood with the prior and the posterior.
 
-#Dice Lab 
-# Second half: following along with the Dice example from class/the Dice lab. 
+
+#Dice Lab Example
+```{r}
+#plotting the overall probability of rolling each possible number on a d4, d6, d8, d10, d12, and d20
+#Indicates that a d4 has a 25% chance of rolling any integer from 1-4, a d20 has a 5% chance of rolling any integer from 1-20, etc. 
+par(mfrow=c(2,3), mar=c(4,4,1,0))
+barplot(c(rep(1/4,4), rep(0,20-4)), ylim=c(0,1), names=c(1:20),  ylab="Probability", main="d4", xlab="dice roll")
+barplot(c(rep(1/6, 6), rep(0, 20-6)), ylim=c(0, 1), names=c(1:20),
+ylab="Probability", main="d6", xlab="dice roll")
+barplot(c(rep(1/8, 8), rep(0, 20-8)), ylim=c(0, 1), names=c(1:20),
+ylab="Probability", main="d8", xlab="dice roll")
+barplot(c(rep(1/10, 10), rep(0, 20-10)), ylim=c(0, 1), names=c(1:20),
+ylab="Probability", main="d10", xlab="dice roll")
+barplot(c(rep(1/12, 12), rep(0, 20-12)), ylim=c(0, 1), names=c(1:20),
+ylab="Probability", main="d12", xlab="dice roll")
+barplot(c(rep(1/20, 20)), ylim=c(0, 1), names=c(1:20),
+ylab="Probability", main="d20", xlab="dice roll")
+```
+```{r}
+LynnRolls <- c(1, 2, 2, 3, 3, 4)
+MattRolls <- c(1, 2, 3, 7, 7, 8)
+```
+```{r}
+#Likelihood of Lynn rolling these numbers on a d4:
+#L(d4 | LynnRolls) = P(LynnRolls | d4) because likelihood and probability are inversely related. The right hand side of the equation is the same as multiplying all of these rolls together because they are independent of one another, therefore:
+#P(1, 2, 2, 3, 3, 4 | d4) = P(1 | d4)*P(2 | d4)*P(2 | d4)*P(3 | d4)*P(3 | d4)*P(4 | d4)
+#Because each face comes up 25% of the time on a four sided die (see plot above), these probabilities are all equivalent to 0.25, therefore:
+#P(1, 2, 2, 3, 3, 4 | d4) =  P(1 | d4)*P(2 | d4)*P(2 | d4)*P(3 | d4)*P(3 | d4)*P(4 | d4)
+# = 0.25*0.25*0.25*0.25*0.25*0.25, or: 
+(0.25)^6
+# Output=0.00024
+log((0.25)^6)
+# Log Likelihood: -8.31
+```
+```{r}
+#Likelihood of Lynn's rolls if using a d20: 
+#The math is the same, except the probability of each integer being rolled on a d20 is 5% instead of 25%
+##P(1, 2, 2, 3, 3, 4 | d20) = P(1 | d20)*P(2 | d20)*P(2 | d20)*P(3 | d20)*P(3 | d20)*P(4 | d20)
+#P(1, 2, 2, 3, 3, 4 | d20)=
+(0.05)^6
+#Output: 1.5625e-08
+log((0.05)^6)
+#Log Likelihood: -17.97
+#Compared to the d4 likelihood, the likelihood of rolling these numbers on a d20 is lower, so it is more likely that Lynn rolled her numbers on a d4 than a d20.
+```
+```{r}
+#Likelihood of Matt's rolls on a d4 = 0, because he has rolls above 4, making the probability: 
+# L(d4 | 1, 2, 3, 7, 7, 8) = P(1, 2, 3, 7, 7, 8 | d4)
+# = P(1 | d4)*P(2 | d4)*P(3 | d4)*P(7 | d4)*P(7 | d4)*P(8 | d4)
+# = 0.25 * 0.25 * 0.25 * 0 * 0 * 0
+(0.25)^3 * (0)^3
+# Output = 0
+# Meanwhile for a d20: L(d20 | 1, 2, 3, 7, 7, 8) = P(1, 2, 3, 7, 7, 8 | d20)
+(0.05)^6 
+#Output: 1.5625e-08
+#D20 is, by definition, more likely than a d4 for Matt's rolls. 
+```
+```{r}
+#Plotting the likelihood of both sets of rolls on each die:
+dice = c(4,6,8,10,12,20)
+x <- dice
+probdice = 1/x #probability of each die roll on each die
+likelynn = probdice^6
+likematt=likelynn
+likematt[1:2]=0 
+likematt
+log10(likematt)
+likelynn
+log10(likelynn)
+```
+```{r}
+plot(dice, log10(likelynn), col="red", type="b", xlab="sides", ylab="Log Likelihood")
+points(dice, log10(likematt), col="blue", type="b", xlab="sides", ylab="Log Likelihood", pch=0, lty=2) 
+legend("topright", c("Lynn", "Matt"), col=c("red", "blue"), pch=c(1, 0), lty=c(1, 2))
+```
+#Bayesian Inference
+#Posterior probabilities add in priors/allow you to add in informatino you already know about a system in order to influence your final corrected likelihood. Posterior probabilities are approximately the prior probabilities multiplied by the likelihood of your data. 
+#Lynn and Matt's rolls with priors (in this case, number of each die in their personal collections = 100):
+#Lynn has 10, 60, 10, 10, 10, and 10 of d4s, d6s, d8s, d10s, d12s, and d20s, respectively.
+#Matt has 10, 10, 10, 10, 30, and 30 of d4s, d6s, d8s, d10s, d12s, and d20s, respectively.
+#Matt's priors:
+```{r}
+dice = c(4,6,8,10,12,20)
+x <- dice
+probdice = 1/x #probability of each die roll on each die
+likematt = probdice^6 #Matt's likelihoods 
+priormatt=c(0.1, 0.1, 0.1, 0.1, 0.3, 0.3)
+posteriormatt=likematt*priormatt
+flatprior = rep(1/6,6)
+flatmatt = likematt*flatprior
+```
+#Lynn's priors:
+```{r}
+dice = c(4,6,8,10,12,20)
+x <- dice
+probdice = 1/x #probability of each die roll on each die
+likelynn = probdice^6
+priorlynn=c(0.1, 0.6, 0.1, 0.1, 0.1, 0.1)
+posteriorlynn=likelynn*priorlynn
+flatlynn=likelynn*flatprior
+```
+#Plotting Matt and Lynn's priors:
+```{r}
+par(mfrow=c(1,2))
+plot(dice, log10(likematt), type="b", col="blue", pch=0, lty=2, ylim=c(-10, -4), xlim=c(8, 20))
+points(dice, log10(flatmatt), type="b", col="blue", pch=1, lty=1, ylim=c(-10, -4), xlim=c(8, 20))
+points(dice, log10(posteriormatt), type="b", col="blue", pch=2, lty=3, ylim=c(-10, -4), xlim=c(8, 20))
+legend("bottomleft", c("likelihood", "flatprior", "posterior"), pch=c(0, 1, 2), lty=c(2, 1, 3), col="blue")
+
+#have to change this to re-include d4 and d6
+plot(dice, log10(likelynn), type="b", col="red", pch=0, lty=2, ylim=c(-10, -4), xlim=c(8, 20))
+points(dice, log10(flatlynn), type="b", col="red", pch=1, lty=1, ylim=c(-10, -4), xlim=c(8, 20))
+points(dice, log10(posteriorlynn), type="b", col="red", pch=2, lty=3, ylim=c(-10, -4), xlim=c(8, 20))
+legend("bottomleft", c("likelihood", "flatprior", "posterior"), pch=c(0, 1, 2), lty=c(2, 1, 3), col="red")
+```
+# Second half: following along with the Dice lab sample data
 # A 6 sided-die is called a d6, and people often collect polyhedral dice in standard sizes. Those sizes are d4, d6, d8, d10, d12, and d20, where dN is shorthand for a dice with N sides.
 # You are following a table of six DND players where they are very bad at writing down which dice they roll, but they know exactly how many of each type of die they have. For each of the following sets of dice rolls, do a Bayesian analysis. Calculate and plot the log-likelihood and the posterior in R for all six dice types. Use the values in Table 2 as the basis for your priors.
 ```{r}
@@ -147,5 +261,37 @@ LucyRolls <- c(3, 5, 2, 3, 4, 3)
 ```{r}
 NumberDice <- read_excel("NumberDiceTable2.xlsx")
 View(NumberDice)
+```
+```{r}
+#Plotting the likelihood of both sets of rolls on each die:
+dice = c(4,6,8,10,12,20)
+x <- dice
+probdice = 1/x #probability of each die roll on each die
+likeBenji = probdice^6
+likeBenji[1:5]=0
+likeMarcus = probdice^6
+likeMarcus[1:4]=0
+likeCarrie = probdice^6
+likeCarrie[1:2]=0
+likeLucy = probdice^6
+likeLucy[1]=0
+
+log10(likeBenji)
+log10(likeMarcus)
+log10(likeCarrie)
+log10(likeLucy)
+```
+#Plotting each likelihood NOT taking into account how many dice each of them have
+```{r}
+par(mfrow=c(2,2), mar=c(4,4,1,0))
+plot(dice, log10(likeBenji), type="b", xlab="sides", ylab="Log Likelihood", main="Benji's Rolls", ylim=c(-9, -4))
+plot(dice, log10(likeMarcus), type="b", xlab="sides", ylab="Log Likelihood", main="Marcus's Rolls", ylim=c(-9, -4))
+plot(dice, log10(likeCarrie), type="b", xlab="sides", ylab="Log Likelihood", main="Carrie's Rolls", ylim=c(-9, -4))
+plot(dice, log10(likeLucy), type="b", xlab="sides", ylab="Log Likelihood", main="Lucy's Rolls", ylim=c(-9, -4))
+```
+#Now taking into account how many of each die they have (data is in the file NumberDice)
+
+```{r}
+
 ```
 

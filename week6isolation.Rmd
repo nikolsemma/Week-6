@@ -46,8 +46,8 @@ AICc(iso4)
 
 ```{r}
 par(mfrow = c(1, 2))
-with(Isolation, (Boxplot(area, incidence)))
-with(Isolation, (Boxplot(isolation, incidence)))
+with(Isolation, (Boxplot(area, incidence, xlab="Incidence of Birds", ylab="Area (km^2)", col=c("blue","green"))))
+with(Isolation, (Boxplot(isolation, incidence, xlab="Incidence of Birds", ylab="Distance from Mainland (km)", col=c("blue","green"))))
 ```
 ```{r}
 summary(iso3)
