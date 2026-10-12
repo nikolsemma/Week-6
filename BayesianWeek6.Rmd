@@ -242,10 +242,10 @@ points(dice, log10(flatmatt), type="b", col="blue", pch=1, lty=1, ylim=c(-10, -4
 points(dice, log10(posteriormatt), type="b", col="blue", pch=2, lty=3, ylim=c(-10, -4), xlim=c(8, 20))
 legend("bottomleft", c("likelihood", "flatprior", "posterior"), pch=c(0, 1, 2), lty=c(2, 1, 3), col="blue")
 
-#have to change this to re-include d4 and d6
-plot(dice, log10(likelynn), type="b", col="red", pch=0, lty=2, ylim=c(-10, -4), xlim=c(8, 20))
-points(dice, log10(flatlynn), type="b", col="red", pch=1, lty=1, ylim=c(-10, -4), xlim=c(8, 20))
-points(dice, log10(posteriorlynn), type="b", col="red", pch=2, lty=3, ylim=c(-10, -4), xlim=c(8, 20))
+#code from above altered with lynn's priors and to re-include d4 and d6
+plot(dice, log10(likelynn), type="b", col="red", pch=0, lty=2, ylim=c(-10, -3), xlim=c(4, 20))
+points(dice, log10(flatlynn), type="b", col="red", pch=1, lty=1, ylim=c(-10, -3), xlim=c(4, 20))
+points(dice, log10(posteriorlynn), type="b", col="red", pch=2, lty=3, ylim=c(-10, -3), xlim=c(4, 20))
 legend("bottomleft", c("likelihood", "flatprior", "posterior"), pch=c(0, 1, 2), lty=c(2, 1, 3), col="red")
 ```
 # Second half: following along with the Dice lab sample data
@@ -292,6 +292,43 @@ plot(dice, log10(likeLucy), type="b", xlab="sides", ylab="Log Likelihood", main=
 #Now taking into account how many of each die they have (data is in the file NumberDice)
 
 ```{r}
-
+flatprior <- rep(1/6,6)
+priorBenji <-c(0.25,0.05,0.1,0.15,0.2,0.25)
+posteriorBenji <- likeBenji*priorBenji
+flatBenji <- likeBenji*flatprior
+plot(dice, log10(likeBenji), type="b", col="red", pch=0, lty=2, ylim=c(-10, -6), xlim=c(4, 20))
+points(dice, log10(flatBenji), type="b", col="red", pch=1, lty=1, ylim=c(-10, -6), xlim=c(4, 20))
+points(dice, log10(posteriorBenji), type="b", col="red", pch=2, lty=3, ylim=c(-10, -6), xlim=c(4, 20))
+legend("bottomleft", c("likelihood", "flatprior", "posterior"), pch=c(0, 1, 2), lty=c(2, 1, 3), col="red")
+```
+```{r}
+flatprior <- rep(1/6,6)
+priorMarcus <-c(0.04,0.08,0.16,0.32,0.25,0.15)
+posteriorMarcus <- likeMarcus*priorMarcus
+flatMarcus <- likeMarcus*flatprior
+plot(dice, log10(likeMarcus), type="b", col="red", pch=0, lty=2, ylim=c(-10, -6), xlim=c(4, 20))
+points(dice, log10(flatMarcus), type="b", col="red", pch=1, lty=1, ylim=c(-10, -6), xlim=c(4, 20))
+points(dice, log10(posteriorMarcus), type="b", col="red", pch=2, lty=3, ylim=c(-10, -6), xlim=c(4, 20))
+legend("bottomleft", c("likelihood", "flatprior", "posterior"), pch=c(0, 1, 2), lty=c(2, 1, 3), col="red")
+```
+```{r}
+flatprior <- rep(1/6,6)
+priorCarrie <-c(0.2,0.19,0.2,0.2,0.01,0.2)
+posteriorCarrie <- likeCarrie*priorCarrie
+flatCarrie <- likeCarrie*flatprior
+plot(dice, log10(likeCarrie), type="b", col="red", pch=0, lty=2, ylim=c(-10, -4), xlim=c(4, 20))
+points(dice, log10(flatCarrie), type="b", col="red", pch=1, lty=1, ylim=c(-10, -4), xlim=c(4, 20))
+points(dice, log10(posteriorCarrie), type="b", col="red", pch=2, lty=3, ylim=c(-10, -4), xlim=c(4, 20))
+legend("bottomleft", c("likelihood", "flatprior", "posterior"), pch=c(0, 1, 2), lty=c(2, 1, 3), col="red")
+```
+```{r}
+flatprior <- rep(1/6,6)
+priorLucy <-c(0.04,0.06,0.08,0.1,0.12,0.6)
+posteriorLucy <- likeLucy*priorLucy
+flatLucy <- likeLucy*flatprior
+plot(dice, log10(likeLucy), type="b", col="red", pch=0, lty=2, ylim=c(-10, -4), xlim=c(4, 20))
+points(dice, log10(flatLucy), type="b", col="red", pch=1, lty=1, ylim=c(-10, -4), xlim=c(4, 20))
+points(dice, log10(posteriorLucy), type="b", col="red", pch=2, lty=3, ylim=c(-10, -4), xlim=c(4, 20))
+legend("bottomleft", c("likelihood", "flatprior", "posterior"), pch=c(0, 1, 2), lty=c(2, 1, 3), col="red")
 ```
 
